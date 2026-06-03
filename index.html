@@ -95,24 +95,32 @@ input {
 <script>
 let products = [];
 
+// načtení CSV bez cache (aby F5 načetlo nové změny)
 async function loadCSV() {
-    const response = await fetch("./produkty.csv");
-    const text = await response.text();
+    try {
+        const response = await fetch("./produkty.csv?nocache=" + new Date().getTime(), {
+            cache: "no-store"
+        });
 
-    const rows = text.trim().split("\n").slice(1);
+        const text = await response.text();
 
-    products = rows.map(row => {
-        const cols = row.split(";");
+        const rows = text.trim().split("\n").slice(1);
 
-        return {
-            name: cols[0],
-            price: parseInt(cols[1]) || 0,
-            qty: 0,
-            img: cols[2] ? cols[2] : "obrazky/default.jpg"
-        };
-    });
+        products = rows.map(row => {
+            const cols = row.split(";");
 
-    renderProducts();
+            return {
+                name: cols[0],
+                price: parseInt(cols[1]) || 0,
+                qty: 0,
+                img: cols[2] ? cols[2] : "obrazky/default.jpg"
+            };
+        });
+
+        renderProducts();
+    } catch (error) {
+        console.error("Chyba načítání CSV:", error);
+    }
 }
 
 function renderProducts() {
@@ -125,7 +133,8 @@ function renderProducts() {
 
         div.innerHTML = `
             <div class="product-info">
-                <img src="${p.img}" alt="${p.name                  <strong>${p.name}</strong><br>
+                <img src="${p.img}"      <div>
+                    <strong>${p.name}</strong><br>
                     ${p.price} Kč
                 </div>
             </div>
@@ -196,9 +205,9 @@ function sendOrder() {
     window.location.href = mail;
 }
 
+// spuštění po načtení stránky
 loadCSV();
 </script>
 
 </body>
 </html>
-
