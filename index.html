@@ -133,17 +133,24 @@ function renderProducts() {
 
         div.innerHTML = `
             <div class="product-info">
-                <img src="${p.img}"      <div>
-                    <strong>${p.name}</strong><br>
-                    ${p.price} Kč
+                <img src="${p.img}" alt="${p.name}">
+                
+                <div style="display:flex; flex-direction:column;">
+                    <strong>${p.name}</strong>
+                    <span>${p.price} Kč</span>
                 </div>
             </div>
-            <input type="number" min="0" value="0"
+
+            <input
+                type="number"
+                min="0"
+                value="0"
                 onchange="updateQty(${i}, this.value)">
         `;
 
         container.appendChild(div);
     });
+}
 }
 
 function updateQty(index, value) {
