@@ -58,6 +58,11 @@ button {
     border-radius: 10px;
     cursor: pointer;
 }
+input {
+    padding: 8px;
+    width: 100%;
+    max-width: 300px;
+}
 </style>
 </head>
 
@@ -90,43 +95,40 @@ button {
 <script>
 let products = [];
 
-// ✅ Načtení CSV
 async function loadCSV() {
-    let response = await fetch("produkty.csv");
-    let text = await response.text();
+    const response = await fetch("./produkty.csv");
+    const text = await response.text();
 
-    let rows = text.trim().split("\n").slice(1);
+    const rows = text.trim().split("\n").slice(1);
 
     products = rows.map(row => {
-        let cols = row.split(";");
+        const cols = row.split(";");
+
         return {
             name: cols[0],
-            price: parseInt(cols[1]),
+            price: parseInt(cols[1]) || 0,
             qty: 0,
-            img: "obrazky/default.jpg" // můžeš změnit
+            img: cols[2] ? cols[2] : "obrazky/default.jpg"
         };
     });
 
     renderProducts();
 }
 
-// ✅ Vykreslení produktů
 function renderProducts() {
-    let container = document.getElementById("products");
+    const container = document.getElementById("products");
     container.innerHTML = "";
 
     products.forEach((p, i) => {
-        let div = document.createElement("div");
+        const div = document.createElement("div");
         div.className = "product";
 
         div.innerHTML = `
             <div class="product-info">
-                <img src="${p.img        <div>
-                    <strong>${p.name}</strong><br>
+                <img src="${p.img}" alt="${p.name                  <strong>${p.name}</strong><br>
                     ${p.price} Kč
                 </div>
             </div>
-
             <input type="number" min="0" value="0"
                 onchange="updateQty(${i}, this.value)">
         `;
@@ -135,13 +137,11 @@ function renderProducts() {
     });
 }
 
-// ✅ Aktualizace
 function updateQty(index, value) {
     products[index].qty = parseInt(value) || 0;
     updateSummary();
 }
 
-// ✅ Souhrn
 function updateSummary() {
     let total = 0;
     let count = 0;
@@ -155,39 +155,50 @@ function updateSummary() {
     document.getElementById("count").innerText = count;
 }
 
-// ✅ Odeslání objednávky (Outlook přes mailto)
 function sendOrder() {
-    let name = document.getElementById("name").value;
-    let surname = document.getElementById("surname").value;
-    let email = document.getElementById("email").value;
-    let phone = document.getElementById("phone").value;
+    const name = document.getElementById("name").value;
+    const surname = document.getElementById("surname").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
 
     if (!name || !surname || !email || !phone) {
         alert("Vyplň všechny údaje!");
         return;
     }
 
-    let text = "Objednávka:\n\n";
+    let text = "OBJEDNÁVKA\n\n";
+    text += "Jméno: " + name + " " + surname + "\n";
+    text += "Email: " + email + "\n";
+    text += "Telefon: " + phone + "\n\n";
+    text += "Objednané položky:\n";
+
+    let totalPrice = 0;
+    let totalCount = 0;
 
     products.forEach(p => {
         if (p.qty > 0) {
-            text += `${p.name}: ${p.qty} ks\n`;
+            let itemTotal = p.price * p.qty;
+
+            text += "- " + p.name + ": " + p.qty + " ks × " + p.price + " Kč = " + itemTotal + " Kč\n";
+
+            totalPrice += itemTotal;
+            totalCount += p.qty;
         }
     });
 
-    text += `\nCelkem kusů: ${document.getElementById("count").innerText}`;
-    text += `\nCena: ${document.getElementById("total").innerText} Kč`;
+    text += "\nCelkem kusů: " + totalCount + "\n";
+    text += "Celková cena: " + totalPrice + " Kč";
 
-    let mail = "mailto:app@kostka-skola.cz"
-        + "?subject=Objednavka"
+    const mail = "mailto:app@kostka-skola.cz"
+        + "?subject=" + encodeURIComponent("Nová objednávka")
         + "&body=" + encodeURIComponent(text);
 
     window.location.href = mail;
 }
 
-// ✅ start
 loadCSV();
 </script>
 
 </body>
 </html>
+
