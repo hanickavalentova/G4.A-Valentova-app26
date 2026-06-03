@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -12,17 +13,20 @@ body {
     background: linear-gradient(135deg, #ffd6ec, #c8f7c5);
     color: #333;
 }
+
 header {
     text-align: center;
     padding: 30px;
     background: white;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
+
 .container {
     max-width: 900px;
     margin: auto;
     padding: 20px;
 }
+
 .product {
     background: white;
     padding: 15px;
@@ -33,23 +37,42 @@ header {
     justify-content: space-between;
     align-items: center;
 }
+
 .product img {
     width: 90px;
     height: 90px;
     border-radius: 10px;
     object-fit: cover;
-    margin-right: 15px;
 }
+
 .product-info {
     display: flex;
     align-items: center;
+    gap: 15px;
 }
-.summary, .form {
+
+.product-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-text strong {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.price {
+    font-size: 16px;
+}
+
+.summary,
+.form {
     background: white;
     padding: 20px;
     border-radius: 15px;
     margin-top: 20px;
 }
+
 button {
     padding: 10px 20px;
     background: #ff1493;
@@ -58,6 +81,7 @@ button {
     border-radius: 10px;
     cursor: pointer;
 }
+
 input {
     padding: 8px;
     width: 100%;
@@ -95,10 +119,9 @@ input {
 <script>
 let products = [];
 
-// načtení CSV bez cache (aby F5 načetlo nové změny)
 async function loadCSV() {
     try {
-        const response = await fetch("./produkty.csv?nocache=" + new Date().getTime(), {
+        const response = await fetch("./produkty.csv?nocache=" + Date.now(), {
             cache: "no-store"
         });
 
@@ -110,16 +133,17 @@ async function loadCSV() {
             const cols = row.split(";");
 
             return {
-                name: cols[0],
+                name: cols[0]?.trim() || "",
                 price: parseInt(cols[1]) || 0,
                 qty: 0,
-                img: cols[2] ? cols[2] : "obrazky/default.jpg"
+                img: cols[2]?.trim() || "obrazky/default.jpg"
             };
         });
 
         renderProducts();
-    } catch (error) {
-        console.error("Chyba načítání CSV:", error);
+
+    } catch (err) {
+        console.error("Chyba načítání CSV:", err);
     }
 }
 
@@ -128,16 +152,17 @@ function renderProducts() {
     container.innerHTML = "";
 
     products.forEach((p, i) => {
+
         const div = document.createElement("div");
         div.className = "product";
 
         div.innerHTML = `
             <div class="product-info">
                 <img src="${p.img}" alt="${p.name}">
-                
-                <div style="display:flex; flex-direction:column;">
+
+                <div class="product-text">
                     <strong>${p.name}</strong>
-                    <span>${p.price} Kč</span>
+                    <span class="price">${p.price} Kč</span>
                 </div>
             </div>
 
@@ -151,7 +176,6 @@ function renderProducts() {
         container.appendChild(div);
     });
 }
-}
 
 function updateQty(index, value) {
     products[index].qty = parseInt(value) || 0;
@@ -159,6 +183,7 @@ function updateQty(index, value) {
 }
 
 function updateSummary() {
+
     let total = 0;
     let count = 0;
 
@@ -172,6 +197,7 @@ function updateSummary() {
 }
 
 function sendOrder() {
+
     const name = document.getElementById("name").value;
     const surname = document.getElementById("surname").value;
     const email = document.getElementById("email").value;
@@ -183,38 +209,44 @@ function sendOrder() {
     }
 
     let text = "OBJEDNÁVKA\n\n";
+
     text += "Jméno: " + name + " " + surname + "\n";
     text += "Email: " + email + "\n";
     text += "Telefon: " + phone + "\n\n";
+
     text += "Objednané položky:\n";
 
     let totalPrice = 0;
     let totalCount = 0;
 
     products.forEach(p => {
-        if (p.qty > 0) {
-            let itemTotal = p.price * p.qty;
 
-            text += "- " + p.name + ": " + p.qty + " ks × " + p.price + " Kč = " + itemTotal + " Kč\n";
+        if (p.qty > 0) {
+
+            const itemTotal = p.qty * p.price;
+
+            text += "- " + p.name + ": "
+                + p.qty + " ks × "
+                + p.price + " Kč = "
+                + itemTotal + " Kč\n";
 
             totalPrice += itemTotal;
             totalCount += p.qty;
         }
     });
 
-    text += "\nCelkem kusů: " + totalCount + "\n";
-    text += "Celková cena: " + totalPrice + " Kč";
+    text += "\nCelkem kusů: " + totalCount;
+    text += "\nCelková cena: " + totalPrice + " Kč";
 
-    const mail = "mailto:app@kostka-skola.cz"
+    window.location.href =
+        "mailto:app@kostka-skola.cz"
         + "?subject=" + encodeURIComponent("Nová objednávka")
         + "&body=" + encodeURIComponent(text);
-
-    window.location.href = mail;
 }
 
-// spuštění po načtení stránky
 loadCSV();
 </script>
 
 </body>
 </html>
+```
