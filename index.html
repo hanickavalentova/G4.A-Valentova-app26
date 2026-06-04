@@ -211,10 +211,10 @@ function sendOrder() {
         if (p.qty > 0) {
             let sum = p.qty * p.price;
 
-            text += "- " + p.name + ": "
-                + p.qty + " ks x "
-                + p.price + " = "
-                + sum + "\n";
+           text += "- " + p.name + ": "
+    + p.qty + " ks x "
+    + p.price + " CZK = "
+    + sum + " CZK\n";
 
             totalPrice += sum;
             totalCount += p.qty;
@@ -229,7 +229,7 @@ function sendOrder() {
         + "?subject=" + encodeURIComponent("Nova objednavka")
         + "&body=" + encodeURIComponent(text);
 
-    window.open(mailto);
+    window.location.href = mailto;
 }
 
 loadCSV();
